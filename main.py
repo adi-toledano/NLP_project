@@ -37,10 +37,8 @@ def vectorize_fit_transform(train, N):
     combined_text = ' '.join(train)
     vectorizer = CountVectorizer(analyzer='char', ngram_range=(1, N), lowercase=False)
     vectorizer.fit_transform([combined_text])
-
     # Get the feature names (characters and n-grams)
     # feature_names = vectorizer.get_feature_names_out()
-
     return vectorizer
 
 
@@ -53,13 +51,15 @@ def vectorize_transform(set, vectorizer):
     return vectorized_words
 
 
-def load_and_preprocess_data(load_dataset, task_num):
-    tasks, datasets, transformers = load_dataset()
+def load_and_preprocess_data(load_dataset_func, task_num):
+    tasks, datasets, transformers = load_dataset_func()
     x_train, x_val, x_test = extract_data_X(datasets)
     y_train, y_val, y_test = extract_data_y(datasets)
+
     y_train = [row[task_num] for row in y_train]
     y_val = [row[task_num] for row in y_val]
     y_test = [row[task_num] for row in y_test]
+
     return x_train, x_val, x_test, y_train, y_val, y_test
 
 
@@ -78,13 +78,14 @@ def train_classifier(x_train_vec, y_train, x_val_vec, y_val, N):
     grid_search.fit(x_train_vec, y_train)
     best_model = grid_search.best_estimator_
     val_pred = best_model.predict(x_val_vec)
+
+    # Calculate different metrics
     val_accuracy = metrics.accuracy_score(y_val, val_pred)
     val_f1 = metrics.f1_score(y_val, val_pred)
     val_auc_roc = roc_auc_score(y_val, best_model.predict_proba(x_val_vec)[:, 1])
-    classifier_result = (best_model, val_auc_roc)
-    print(f'{best_model} achieved accuracy of {val_accuracy}, f1 accuracy of {val_f1} and AUC-ROC of {val_auc_roc}')
 
-    return classifier_result
+    print(f'{best_model} achieved accuracy of {val_accuracy}, f1 accuracy of {val_f1} and AUC-ROC of {val_auc_roc}')
+    return best_model, val_auc_roc
 
 
 def test_best_classifier(classifier_results, y_test):
@@ -94,6 +95,8 @@ def test_best_classifier(classifier_results, y_test):
 
     print(f'Running best classifier {best_model} on test set with N={N}')
     test_pred = best_model.predict(x_test_vec)
+
+    # Calculate different metrics
     test_accuracy = metrics.accuracy_score(y_test, test_pred)
     test_f1 = metrics.f1_score(y_test, test_pred)
     test_auc_roc = roc_auc_score(y_test, best_model.predict_proba(x_test_vec)[:, 1])
@@ -103,27 +106,23 @@ def test_best_classifier(classifier_results, y_test):
     print(f'Test AUC-ROC: {test_auc_roc}')
 
 
-def learn(load_dataset, task_num=0):
-    Ngrams = [1, 2, 3]
+def learn(load_dataset_func, task_num=0):
+    N_grams = [1, 2]
     classifier_results = {}
-    x_train, x_val, x_test, y_train, y_val, y_test = load_and_preprocess_data(load_dataset, task_num)
+    x_train, x_val, x_test, y_train, y_val, y_test = load_and_preprocess_data(load_dataset_func, task_num)
 
     # Tune choice of N
-    for N in Ngrams:
+    for N in N_grams:
         x_train_vec, x_val_vec, x_test_vec = vectorize_data(x_train, x_val, x_test, N)
-        best_model, val_f1 = train_classifier(x_train_vec, y_train, x_val_vec, y_val, N)
-        classifier_results[N] = (best_model, val_f1, x_test_vec)
+        best_model, val_auc_roc = train_classifier(x_train_vec, y_train, x_val_vec, y_val, N)
+        classifier_results[N] = (best_model, val_auc_roc, x_test_vec)
 
     test_best_classifier(classifier_results, y_test)
 
 
 def main():
-    # Only for debug!
-    # np.random.seed(123)
-    # n_features = 1024
-
     # Load BBBP dataset
-    # learn(load_bbbp)
+    learn(load_bbbp)
 
     # Load HIV dataset
     # This one takes lots of time because it is consisted from 40,000 samples
@@ -132,8 +131,8 @@ def main():
 
     # Load clintox dataset
     # clintox has 2 tasks, so need to classify them separately
-    # learn(load_clintox, task_num=0)
-    # learn(load_clintox, task_num=1)
+    learn(load_clintox, task_num=0)
+    learn(load_clintox, task_num=1)
     #
     # # Load BACE dataset
     learn(load_bace_classification)
