@@ -2,6 +2,7 @@
  Chosen data sets are: BBBP, HIV, clinTox, BACE
  1) BBBP, HIV, BACE contain 1 task, clinTox contains 2 tasks.
  2) BBBP, BACE, clinTox contains less than 2100 samples, HIV contains around 40,000 (good for comparison)
+ 3) The metric used for evaluation is AUC-ROC
 
  Requirements: need to open project in Conda environment and install the library 'deepchem'
 """
@@ -18,6 +19,7 @@ from deepchem.molnet import load_bace_classification
 from sklearn import svm, metrics
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import roc_auc_score
 
 
 def extract_data_X(dataset):
@@ -28,6 +30,7 @@ def extract_data_X(dataset):
 def extract_data_y(dataset):
     train_dataset, valid_dataset, test_dataset = dataset
     return train_dataset.y, valid_dataset.y, test_dataset.y
+
 
 # Use CountVectorizer to vectorize based on characters and n-grams
 def vectorize_fit_transform(train, N):
@@ -70,14 +73,16 @@ def vectorize_data(x_train, x_val, x_test, N):
 
 def train_classifier(x_train_vec, y_train, x_val_vec, y_val, N):
     print(f"Running SVM on validation set with N={N}")
-    grid_search = GridSearchCV(svm.SVC(), {'C': [0.1, 1, 10, 100], 'gamma': [1, 0.1, 0.01, 0.001], 'kernel': ['rbf']}, cv=3)
+    grid_search = GridSearchCV(svm.SVC(probability=True),
+                               {'C': [0.1, 1, 10, 100], 'gamma': [1, 0.1, 0.01, 0.001], 'kernel': ['rbf']}, cv=3)
     grid_search.fit(x_train_vec, y_train)
     best_model = grid_search.best_estimator_
     val_pred = best_model.predict(x_val_vec)
     val_accuracy = metrics.accuracy_score(y_val, val_pred)
     val_f1 = metrics.f1_score(y_val, val_pred)
-    classifier_result = (best_model, val_f1)
-    print(f'{best_model} achieved accuracy of {val_accuracy} and f1 accuracy of {val_f1}')
+    val_auc_roc = roc_auc_score(y_val, best_model.predict_proba(x_val_vec)[:, 1])
+    classifier_result = (best_model, val_auc_roc)
+    print(f'{best_model} achieved accuracy of {val_accuracy}, f1 accuracy of {val_f1} and AUC-ROC of {val_auc_roc}')
 
     return classifier_result
 
@@ -91,9 +96,11 @@ def test_best_classifier(classifier_results, y_test):
     test_pred = best_model.predict(x_test_vec)
     test_accuracy = metrics.accuracy_score(y_test, test_pred)
     test_f1 = metrics.f1_score(y_test, test_pred)
+    test_auc_roc = roc_auc_score(y_test, best_model.predict_proba(x_test_vec)[:, 1])
 
     print(f'Test Accuracy: {test_accuracy}')
     print(f'Test F1-score: {test_f1}')
+    print(f'Test AUC-ROC: {test_auc_roc}')
 
 
 def learn(load_dataset, task_num=0):
@@ -116,7 +123,7 @@ def main():
     # n_features = 1024
 
     # Load BBBP dataset
-    learn(load_bbbp)
+    # learn(load_bbbp)
 
     # Load HIV dataset
     # This one takes lots of time because it is consisted from 40,000 samples
@@ -124,12 +131,13 @@ def main():
     # learn(load_hiv)
 
     # Load clintox dataset
-    # clintox has 2 tasks, so need to classify them sepertaly
-    learn(load_clintox, task_num=0)
-    learn(load_clintox, task_num=1)
+    # clintox has 2 tasks, so need to classify them separately
+    # learn(load_clintox, task_num=0)
+    # learn(load_clintox, task_num=1)
     #
     # # Load BACE dataset
     learn(load_bace_classification)
+
 
 if __name__ == "__main__":
     main()
