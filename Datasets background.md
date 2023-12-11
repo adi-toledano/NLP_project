@@ -1,3 +1,18 @@
+## Regression 
+
+### FreeSolv
+The Free Solvation Database (FreeSolv) provides experimental and calculated hydration free energy of small molecules in water.
+16 A subset of the compounds in the dataset are also used in the SAMPL blind prediction challenge.
+15 The calculated values are derived from alchemical free energy calculations using molecular dynamics simulations.
+We include the experimental values in the benchmark collection, and use calculated values for comparison.
+
+### Lipophilicity
+Lipophilicity is an important feature of drug molecules that affects both membrane permeability and solubility.
+This dataset, curated from ChEMBL database,45 provides experimental results of octanol/water distribution coefficient (log D at pH 7.4)
+of 4200 compounds.
+
+## Classification
+
 ### BACE
 BACE The BACE dataset provides quantitative (IC50) and qualitative (binary label) binding results for a set of 
 inhibitors of human β-secretase 1 (BACE-1).51 All data are experimental values reported in scientific literature over 
@@ -12,13 +27,6 @@ the blood–brain barrier blocks most drugs, hormones and neurotransmitters. Thu
 long-standing issue in development of drugs targeting central nervous system. This dataset includes binary labels 
 for over 2000 compounds on their permeability properties. Scaffold splitting is also recommended for this well-defined
 target.
-
-### ClinTox
-ClinTox The ClinTox dataset, introduced as part of this work, compares drugs approved by the FDA and drugs that have 
-failed clinical trials for toxicity reasons.58,59 The dataset includes two classification tasks for 1491 drug compounds 
-with known chemical structures: (1) clinical trial toxicity (or absence of toxicity) and (2) FDA approval status.
-List of FDA-approved drugs are compiled from the SWEETLEAD database,60 and list of drugs that failed clinical trials 
-for toxicity reasons are compiled from the Aggregate Analysis of ClinicalTrials.gov (AACT) database.61
 
 ### HIV
 HIV The HIV dataset was introduced by the Drug Therapeutics Program (DTP) AIDS Antiviral Screen, which tested the
