@@ -183,10 +183,10 @@ def main():
     # Classification problems
 
     # Load BBBP dataset
-    # learn_classification(load_bbbp, split="scaffold")
+    learn_classification(load_bbbp, split="scaffold")
 
     # Load BACE dataset
-    # learn_classification(load_bace_classification, split="scaffold")
+    learn_classification(load_bace_classification, split="scaffold")
 
 
 if __name__ == "__main__":
