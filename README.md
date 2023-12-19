@@ -1,4 +1,2 @@
 ## NLP Project - Predicting molecular properties using traditional NLP techniques
-
-The code implmentation is at main.py.
- 
+### By Matas Keras, Ruo Yang Jiang and Adi Toledano
