@@ -27,11 +27,3 @@ the blood–brain barrier blocks most drugs, hormones and neurotransmitters. Thu
 long-standing issue in development of drugs targeting central nervous system. This dataset includes binary labels 
 for over 2000 compounds on their permeability properties. Scaffold splitting is also recommended for this well-defined
 target.
-
-### HIV
-HIV The HIV dataset was introduced by the Drug Therapeutics Program (DTP) AIDS Antiviral Screen, which tested the
-ability to inhibit HIV replication for over 40 000 compounds.47 Screening results were evaluated and placed into 
-three categories: confirmed inactive (CI), confirmed active (CA) and confirmed moderately active (CM).
-We further combine the latter two labels, making it a classification task between inactive (CI) and active (CA and CM).
-As we are more interested in discover new categories of HIV inhibitors, scaffold splitting (introduced in the next subsection)
-is recommended for this dataset.
